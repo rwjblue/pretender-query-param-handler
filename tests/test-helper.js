@@ -1,8 +1,16 @@
-import Application from 'dummy/app';
-import config from 'dummy/config/environment';
-import { setApplication } from '@ember/test-helpers';
-import { start } from 'ember-qunit';
+/* globals requirejs */
+import require from 'require';
+import QUnit from 'qunit';
 
-setApplication(Application.create(config.APP));
+QUnit.config.autostart = false;
 
-start();
+function loadTests() {
+  for (let moduleName in requirejs.entries) {
+    if (moduleName.endsWith('test')) {
+      require(moduleName);
+    }
+  }
+}
+
+loadTests();
+QUnit.start();

@@ -2,9 +2,27 @@
 
 const EmberAddon = require('ember-cli/lib/broccoli/ember-addon');
 
+class CustomAddon extends EmberAddon {
+  // there is no way to disable ember-cli's build pipeline from trying to import jQuery if you don't have ember-source
+  _addJqueryInLegacyEmber() {}
+}
+
 module.exports = function (defaults) {
-  let app = new EmberAddon(defaults, {
+  let app = new CustomAddon(defaults, {
     // Add options here
+    trees: {
+      public: null,
+    },
+
+    vendorFiles: {
+      'ember.js': null,
+      'handlebars.js': null,
+    },
+  });
+
+  app.registry.add('template', {
+    name: 'fake-template-compiler',
+    toTree: (tree) => tree,
   });
 
   /*

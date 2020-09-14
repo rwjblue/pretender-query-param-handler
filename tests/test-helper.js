@@ -1,8 +1,12 @@
-/* globals requirejs */
+/* globals requirejs, Testem */
 import require from 'require';
 import QUnit from 'qunit';
 
 QUnit.config.autostart = false;
+
+if (typeof Testem !== 'undefined') {
+  Testem.hookIntoTestFramework();
+}
 
 function loadTests() {
   for (let moduleName in requirejs.entries) {
@@ -13,4 +17,5 @@ function loadTests() {
 }
 
 loadTests();
+
 QUnit.start();

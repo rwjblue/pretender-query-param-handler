@@ -18,9 +18,17 @@
       </div>
     </div>
 
-    <script src="/testem.js" integrity=""></script>
     <script src="{{rootURL}}assets/vendor.js"></script>
     <script src="{{rootURL}}assets/test-support.js"></script>
+
+    <!--
+      loading /testem after test-support.js to avoid having ember-cli itself call
+      Testem.hookIntoTestFramework() before QUnit is loaded; this is a bit bad
+      because any errors that happen in vendor.js and test-support.js will not be
+      seen by testem...
+    -->
+    <script src="/testem.js" integrity=""></script>
+
     <script src="{{rootURL}}assets/dummy.js"></script>
     <script src="{{rootURL}}assets/tests.js"></script>
   </body>

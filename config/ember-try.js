@@ -2,6 +2,15 @@
 
 module.exports = async function () {
   return {
-    scenarios: [],
+    scenarios: [
+      {
+        name: 'pretender-3.4',
+        npm: {
+          devDependencies: {
+            pretender: '~3.4.2',
+          },
+        },
+      },
+    ],
   };
 };

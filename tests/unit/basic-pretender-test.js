@@ -22,7 +22,7 @@ module('basic pretender functionality', function (hooks) {
     assert.deepEqual(await result.json(), { id: '3' });
   });
 
-  test('can match a get request with specific query params independently', async function (assert) {
+  test('can match a get request with specific query params manually', async function (assert) {
     this.server.get('/api/graphql', (request) => {
       switch (request.queryParams.foo) {
         case 'bar':

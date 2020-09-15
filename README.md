@@ -23,6 +23,8 @@ Usage
 Nothing beats a quick demo:
 
 ```js
+import { QueryParamAwarePretender } from 'pretender-query-param-handler';
+
 let server = new QueryParamAwarePretender();
 
 server.get('/api/graphql?foo=bar', () => [ 200, {}, '{ "query": "bar" }'),

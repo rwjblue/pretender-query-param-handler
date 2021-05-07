@@ -45,6 +45,30 @@ console.log(await result.json());
 //=> { query: 'none' }
 ```
 
+
+Normalize URLs
+------------------------------------------------------------------------------
+
+In some cases, the order of the query params doesn't matter. Then you can set
+`normalizeURLs` to true and the server will normalize (sort) the query params while mocking and matching
+
+```js
+import { QueryParamAwarePretender } from 'pretender-query-param-handler';
+
+let server = new QueryParamAwarePretender({
+  normalizeURLs: true
+});
+
+server.get('/api/graphql?foo=bar&bar=baz', () => [ 200, {}, '{ "query": { "foo": "bar", "bar": "baz" } }'),
+
+let result;
+result = await fetch('/api/graphql?bar=baz&foo=bar');
+console.log(await result.json());
+//=> { query: { foo: 'bar', bar: 'baz' } }
+
+```
+
+
 Contributing
 ------------------------------------------------------------------------------
 

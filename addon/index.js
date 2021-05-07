@@ -61,6 +61,20 @@ export class QueryParamAwarePretender extends Pretender {
     OPTIONS: new Map(),
   };
 
+  normalizeURLs = false;
+
+  constructor(options) {
+    super(arguments);
+
+    if (
+      typeof options === 'object' &&
+      options !== null &&
+      typeof options.normalizeURLs === 'boolean'
+    ) {
+      this.normalizeURLs = options.normalizeURLs;
+    }
+  }
+
   register(verb, url, qpHandler, async) {
     let { pathname, search } = new URL(url, document.baseURI);
 
@@ -72,6 +86,8 @@ export class QueryParamAwarePretender extends Pretender {
       pathnameHandlersMap.set(pathname, handler);
     }
 
+    // sort query params so that the order doesn't matter
+    search = this.normalizeURLs ? normalizeQueryString(url) : search;
     handler.add(search, qpHandler, async);
 
     return super.register(verb, pathname, handler.handler, async);
@@ -80,6 +96,8 @@ export class QueryParamAwarePretender extends Pretender {
   // instrumented to provide a nicer error message when a handler for a given queryString is not found
   _handlerFor(verb, url, request) {
     let { pathname, search } = new URL(url, document.baseURI);
+
+    search = this.normalizeURLs ? normalizeQueryString(url) : search;
 
     let handlerFound = super._handlerFor(verb, pathname, request);
 

@@ -90,6 +90,33 @@ module('pretender-query-params-handler', function () {
       );
     });
 
+    test('can match a request with query params in any order', async function (assert) {
+      this.server = new QueryParamAwarePretender({
+        normalizeURLs: true,
+      });
+      this.server.get('/api/graphql?foo=bar&bar=baz', () => [
+        200,
+        {},
+        JSON.stringify({ query: { foo: 'bar', bar: 'baz' } }),
+      ]);
+
+      let result = await fetch('/api/graphql?bar=baz&foo=bar');
+      assert.deepEqual(await result.json(), {
+        query: { foo: 'bar', bar: 'baz' },
+      });
+
+      result = await fetch('/api/graphql?foo=bar&bar=baz');
+      assert.deepEqual(await result.json(), {
+        query: { foo: 'bar', bar: 'baz' },
+      });
+
+      await assert.rejects(
+        fetch('/api/graphql?foo=derp'),
+        /Pretender intercepted GET \/api\/graphql\?foo=derp but no handler was defined for this type of request/,
+        'throws when missing a match'
+      );
+    });
+
     test('it allows clobbering', async function (assert) {
       this.server.get('/api/graphql?foo=bar', () => [
         200,

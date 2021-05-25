@@ -1,3 +1,12 @@
+## v1.2.0 (2021-05-25)
+
+#### :rocket: Enhancement
+* [#4](https://github.com/rwjblue/pretender-query-param-handler/pull/4) Normalize query string while registering and matching handlers ([@parag-datar](https://github.com/parag-datar))
+
+#### Committers: 1
+- Parag ([@parag-datar](https://github.com/parag-datar))
+
+
 ## v1.1.1 (2020-10-28)
 
 #### :bug: Bug Fix

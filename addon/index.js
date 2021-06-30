@@ -88,9 +88,12 @@ export class QueryParamAwarePretender extends Pretender {
 
     // sort query params so that the order doesn't matter
     search = this.normalizeURLs ? normalizeQueryString(url) : search;
-    handler.add(search, qpHandler, async);
 
-    return super.register(verb, pathname, handler.handler, async);
+    // qpHandler's call count is set up in the add function
+    handler.add(search, qpHandler, async);
+    super.register(verb, pathname, handler.handler, async);
+
+    return qpHandler;
   }
 
   // instrumented to provide a nicer error message when a handler for a given queryString is not found

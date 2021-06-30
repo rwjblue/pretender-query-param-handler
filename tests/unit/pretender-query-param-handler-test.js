@@ -16,14 +16,26 @@ module('pretender-query-params-handler', function () {
     });
 
     test('it basically works', async function (assert) {
-      this.server.get('/api/graphql?foo=bar', () => [
+      const handler = this.server.get('/api/graphql?foo=bar', () => [
         200,
         {},
         JSON.stringify({ query: 'bar' }),
       ]);
 
+      assert.equal(
+        handler.numberOfCalls,
+        0,
+        'the call count is initialized to 0 for the handler for the specific url and query param'
+      );
+
       let result = await fetch('/api/graphql?foo=bar');
+
       assert.deepEqual(await result.json(), { query: 'bar' });
+      assert.equal(
+        handler.numberOfCalls,
+        1,
+        'the call count is updated for the handler for the specific url and query param'
+      );
     });
 
     test('triggers unhandledRequest', async function (assert) {
@@ -54,17 +66,17 @@ module('pretender-query-params-handler', function () {
     });
 
     test('can match a get request with specific query params independently', async function (assert) {
-      this.server.get('/api/graphql?foo=bar', () => [
+      const fooBarHandler = this.server.get('/api/graphql?foo=bar', () => [
         200,
         {},
         JSON.stringify({ query: 'bar' }),
       ]);
-      this.server.get('/api/graphql?foo=baz', () => [
+      const fooBazHandler = this.server.get('/api/graphql?foo=baz', () => [
         200,
         {},
         JSON.stringify({ query: 'baz' }),
       ]);
-      this.server.get('/api/graphql', () => [
+      const noQueryParamHandler = this.server.get('/api/graphql', () => [
         200,
         {},
         JSON.stringify({ query: 'none' }),
@@ -81,6 +93,25 @@ module('pretender-query-params-handler', function () {
         await result.json(),
         { query: 'none' },
         'can request without QPs'
+      );
+
+      assert.equal(
+        fooBarHandler.numberOfCalls,
+        1,
+        'the call count is updated for the handler for foo=bar'
+      );
+
+      assert.equal(
+        fooBazHandler.numberOfCalls,
+        1,
+        'the call count is updated for the handler for foo=baz'
+      );
+
+      await fetch('/api/graphql');
+      assert.equal(
+        noQueryParamHandler.numberOfCalls,
+        2,
+        'the call count is 2 after requesting it twice updated for the handler for no query params'
       );
 
       await assert.rejects(

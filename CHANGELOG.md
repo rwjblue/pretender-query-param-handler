@@ -1,3 +1,12 @@
+## v1.2.1 (2021-07-01)
+
+#### :bug: Bug Fix
+* [#5](https://github.com/rwjblue/pretender-query-param-handler/pull/5) fix: return the correct handler instance for register function ([@spham92](https://github.com/spham92))
+
+#### Committers: 1
+- Steven Pham ([@spham92](https://github.com/spham92))
+
+
 ## v1.2.0 (2021-05-25)
 
 #### :rocket: Enhancement

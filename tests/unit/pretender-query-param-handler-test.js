@@ -65,6 +65,26 @@ module('pretender-query-params-handler', function () {
       );
     });
 
+    test('throws actionable errors for matching paths but mis-matching params', async function (assert) {
+      assert.expect(3);
+
+      this.server.get('/api/graphql?foo=bar', () => [
+        200,
+        {},
+        JSON.stringify({ query: 'bar' }),
+      ]);
+
+      // Default errr is
+      // "Error: Pretender intercepted GET /api/graphql?foo=baz but no handler was defined for this type of request"
+      //
+      // which for long URLs with a lot of query parameters is not very helpful
+      await assert.rejects(
+        fetch('/api/graphql?foo=baz'),
+        /a much better error message/,
+        'error message is actionable'
+      );
+    });
+
     test('can match a get request with specific query params independently', async function (assert) {
       const fooBarHandler = this.server.get('/api/graphql?foo=bar', () => [
         200,

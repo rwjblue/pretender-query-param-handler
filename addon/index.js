@@ -91,7 +91,12 @@ export class QueryParamAwarePretender extends Pretender {
 
     // qpHandler's call count is set up in the add function
     handler.add(search, qpHandler, async);
-    super.register(verb, pathname, handler.handler, async);
+    super.register(
+      verb,
+      pathname,
+      qpHandler === this.passthrough ? qpHandler : handler.handler,
+      async
+    );
 
     return qpHandler;
   }

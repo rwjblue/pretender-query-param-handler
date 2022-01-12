@@ -109,6 +109,10 @@ export class QueryParamAwarePretender extends Pretender {
 
       let matchFound = matchers.get(search);
 
+      if (!matchFound) {
+        matchFound = matchers.get(''); // fallback
+      }
+
       return matchFound ? { handler: matchFound } : null;
     }
 

@@ -114,6 +114,32 @@ module('pretender-query-params-handler', function () {
         'the call count is 2 after requesting it twice updated for the handler for no query params'
       );
 
+      result = await fetch('/api/graphql?foo=derp');
+      assert.deepEqual(
+        await result.json(),
+        { query: 'none' },
+        'should fallback to "pretender" default behavior'
+      );
+    });
+
+    test('should not fallback if no base handler defined', async function (assert) {
+      this.server.get('/api/graphql?foo=bar', () => [
+        200,
+        {},
+        JSON.stringify({ query: 'bar' }),
+      ]);
+      this.server.get('/api/graphql?foo=baz', () => [
+        200,
+        {},
+        JSON.stringify({ query: 'baz' }),
+      ]);
+
+      let result = await fetch('/api/graphql?foo=baz');
+      assert.deepEqual(await result.json(), { query: 'baz' }, 'can access baz');
+
+      result = await fetch('/api/graphql?foo=bar');
+      assert.deepEqual(await result.json(), { query: 'bar' }, 'can access bar');
+
       await assert.rejects(
         fetch('/api/graphql?foo=derp'),
         /Pretender intercepted GET \/api\/graphql\?foo=derp but no handler was defined for this type of request/,

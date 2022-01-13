@@ -319,4 +319,126 @@ module('pretender-query-params-handler', function () {
       );
     });
   });
+
+  module('pattern match', function (hooks) {
+    hooks.beforeEach(function () {
+      this.server = new QueryParamAwarePretender();
+    });
+
+    hooks.afterEach(function () {
+      this.server.shutdown();
+    });
+
+    test('pattern match should work', async function (assert) {
+      const handler = this.server.get('/api/graphql?foo=*', () => [
+        200,
+        {},
+        JSON.stringify({ query: 'bar' }),
+      ]);
+
+      assert.equal(
+        handler.numberOfCalls,
+        0,
+        'the call count is initialized to 0 for the handler for the specific url and query param'
+      );
+
+      let result = await fetch('/api/graphql?foo=bar');
+
+      assert.deepEqual(await result.json(), { query: 'bar' });
+      assert.equal(
+        handler.numberOfCalls,
+        1,
+        'the call count is updated for the handler for the specific url and query param'
+      );
+    });
+
+    test('number of params does not match', async function (assert) {
+      this.server.get('/api/graphql?foo=*', () => [
+        200,
+        {},
+        JSON.stringify({ query: 'bar' }),
+      ]);
+
+      await assert.rejects(
+        fetch('/api/graphql?foo=45&variable=123'),
+        /Pretender intercepted GET \/api\/graphql\?foo=45&variable=123 but no handler was defined for this type of request/,
+        'should return an error message'
+      );
+    });
+
+    test('query string with multiple patterns should work', async function (assert) {
+      this.server.get('/api/graphql?foo=*&bar=*&var=1234', () => [
+        200,
+        {},
+        JSON.stringify({ foo: 'bar', bar: 'xyz' }),
+      ]);
+
+      let result = await fetch('/api/graphql?foo=abc&bar=xyz&var=1234');
+      assert.deepEqual(await result.json(), { foo: 'bar', bar: 'xyz' });
+
+      await assert.rejects(
+        fetch('/api/graphql?foo=abc&bar=xyz&var=999'),
+        /Pretender intercepted GET \/api\/graphql\?foo=abc&bar=xyz&var=999 but no handler was defined for this type of request/,
+        'should return an error message'
+      );
+    });
+
+    test('query string with incorrect order should fail', async function (assert) {
+      this.server.get('/api/graphql?bar=*&foo=*&var=1234', () => [
+        200,
+        {},
+        JSON.stringify({ foo: 'bar', bar: 'xyz' }),
+      ]);
+
+      await assert.rejects(
+        fetch('/api/graphql?foo=abc&bar=xyz&var=1234'),
+        /Pretender intercepted GET \/api\/graphql\?foo=abc&bar=xyz&var=1234 but no handler was defined for this type of request/,
+        'should return an error message'
+      );
+    });
+  });
+
+  module('search string ordering', function (hooks) {
+    hooks.beforeEach(function () {
+      this.server = new QueryParamAwarePretender({ normalizeURLs: true });
+    });
+
+    hooks.afterEach(function () {
+      this.server.shutdown();
+    });
+
+    test('query string with same order should work', async function (assert) {
+      this.server.get('/api/graphql?foo=*&bar=*&var=1234', () => [
+        200,
+        {},
+        JSON.stringify({ foo: 'bar', bar: 'xyz' }),
+      ]);
+
+      let result = await fetch('/api/graphql?foo=abc&bar=xyz&var=1234');
+      assert.deepEqual(await result.json(), { foo: 'bar', bar: 'xyz' });
+
+      await assert.rejects(
+        fetch('/api/graphql?foo=abc&bar=xyz&var=999'),
+        /Pretender intercepted GET \/api\/graphql\?foo=abc&bar=xyz&var=999 but no handler was defined for this type of request/,
+        'should return an error message'
+      );
+    });
+
+    test('query string with different order should work', async function (assert) {
+      this.server.get('/api/graphql?bar=*&foo=*&var=1234', () => [
+        200,
+        {},
+        JSON.stringify({ foo: 'bar', bar: 'xyz' }),
+      ]);
+
+      let result = await fetch('/api/graphql?foo=abc&bar=xyz&var=1234');
+      assert.deepEqual(await result.json(), { foo: 'bar', bar: 'xyz' });
+
+      await assert.rejects(
+        fetch('/api/graphql?foo=abc&bar=xyz&var=999'),
+        /Pretender intercepted GET \/api\/graphql\?foo=abc&bar=xyz&var=999 but no handler was defined for this type of request/,
+        'should return an error message'
+      );
+    });
+  });
 });

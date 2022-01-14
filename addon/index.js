@@ -1,4 +1,5 @@
 import Pretender from 'pretender';
+import SimplePatternMatchers from './pattern-matchers';
 
 function normalizeQueryString(requestUrl) {
   let url = new URL(requestUrl, document.baseURI);
@@ -14,7 +15,7 @@ function normalizeQueryString(requestUrl) {
 const QueryParamHandlers = new WeakMap();
 
 export function buildQueryParamHandler() {
-  let matchers = new Map();
+  let matchers = new SimplePatternMatchers();
 
   function handler(request) {
     let queryString = normalizeQueryString(request.url);
@@ -108,6 +109,10 @@ export class QueryParamAwarePretender extends Pretender {
       let { matchers } = QueryParamHandlers.get(handlerFound.handler);
 
       let matchFound = matchers.get(search);
+
+      if (!matchFound) {
+        matchFound = matchers.get(''); // fallback
+      }
 
       return matchFound ? { handler: matchFound } : null;
     }

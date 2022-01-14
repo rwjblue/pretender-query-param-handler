@@ -114,11 +114,10 @@ module('pretender-query-params-handler', function () {
         'the call count is 2 after requesting it twice updated for the handler for no query params'
       );
 
-      result = await fetch('/api/graphql?foo=derp');
-      assert.deepEqual(
-        await result.json(),
-        { query: 'none' },
-        'should fallback to "pretender" default behavior'
+      await assert.rejects(
+        fetch('/api/graphql?foo=derp'),
+        /Pretender intercepted GET \/api\/graphql\?foo=derp \nbut found no handler for it because/,
+        'throws when query param values do not match'
       );
     });
 
@@ -142,8 +141,8 @@ module('pretender-query-params-handler', function () {
 
       await assert.rejects(
         fetch('/api/graphql?foo=derp'),
-        /Pretender intercepted GET \/api\/graphql\?foo=derp but no handler was defined for this type of request/,
-        'throws when missing a match'
+        /Pretender intercepted GET \/api\/graphql\?foo=derp/,
+        'throws when query values do not match'
       );
     });
 
@@ -169,7 +168,7 @@ module('pretender-query-params-handler', function () {
 
       await assert.rejects(
         fetch('/api/graphql?foo=derp'),
-        /Pretender intercepted GET \/api\/graphql\?foo=derp but no handler was defined for this type of request/,
+        /Pretender intercepted GET \/api\/graphql\?foo=derp \nbut found no handler for it/,
         'throws when missing a match'
       );
     });
@@ -361,7 +360,7 @@ module('pretender-query-params-handler', function () {
 
       await assert.rejects(
         fetch('/api/graphql?foo=45&variable=123'),
-        /Pretender intercepted GET \/api\/graphql\?foo=45&variable=123 but no handler was defined for this type of request/,
+        /Pretender intercepted GET \/api\/graphql\?foo=45&variable=123 \nbut found no handler for it/,
         'should return an error message'
       );
     });
@@ -378,7 +377,7 @@ module('pretender-query-params-handler', function () {
 
       await assert.rejects(
         fetch('/api/graphql?foo=abc&bar=xyz&var=999'),
-        /Pretender intercepted GET \/api\/graphql\?foo=abc&bar=xyz&var=999 but no handler was defined for this type of request/,
+        /Pretender intercepted GET \/api\/graphql\?foo=abc&bar=xyz&var=999 \nbut found no handler for it/,
         'should return an error message'
       );
     });
@@ -392,7 +391,7 @@ module('pretender-query-params-handler', function () {
 
       await assert.rejects(
         fetch('/api/graphql?foo=abc&bar=xyz&var=1234'),
-        /Pretender intercepted GET \/api\/graphql\?foo=abc&bar=xyz&var=1234 but no handler was defined for this type of request/,
+        /Pretender intercepted GET \/api\/graphql\?foo=abc&bar=xyz&var=1234 \nbut found no handler for it/,
         'should return an error message'
       );
     });
@@ -419,7 +418,7 @@ module('pretender-query-params-handler', function () {
 
       await assert.rejects(
         fetch('/api/graphql?foo=abc&bar=xyz&var=999'),
-        /Pretender intercepted GET \/api\/graphql\?foo=abc&bar=xyz&var=999 but no handler was defined for this type of request/,
+        /Pretender intercepted GET \/api\/graphql\?foo=abc&bar=xyz&var=999 \nbut found no handler for it/,
         'should return an error message'
       );
     });
@@ -436,8 +435,94 @@ module('pretender-query-params-handler', function () {
 
       await assert.rejects(
         fetch('/api/graphql?foo=abc&bar=xyz&var=999'),
-        /Pretender intercepted GET \/api\/graphql\?foo=abc&bar=xyz&var=999 but no handler was defined for this type of request/,
+        /Pretender intercepted GET \/api\/graphql\?foo=abc&bar=xyz&var=999 \nbut found no handler for it/,
         'should return an error message'
+      );
+    });
+  });
+
+  module('fallback', function (hooks) {
+    hooks.beforeEach(function () {
+      this.server = new QueryParamAwarePretender({ normalizeURLs: true });
+    });
+
+    hooks.afterEach(function () {
+      this.server.shutdown();
+    });
+
+    test('fallback should work', async function (assert) {
+      this.server.get('/api/graphql?foo=123&bar=456&var=1000', () => [
+        200,
+        {},
+        JSON.stringify({ hint: 'all match' }),
+      ]);
+      this.server.get('/api/graphql?foo=*&bar=456&var=1000', () => [
+        200,
+        {},
+        JSON.stringify({ hint: 'pattern match' }),
+      ]);
+      this.server.get('/api/graphql', () => [
+        200,
+        {},
+        JSON.stringify({ hint: 'fallback' }),
+      ]);
+
+      let result = await fetch('/api/graphql?foo=123&bar=456&var=1000');
+      assert.deepEqual(await result.json(), { hint: 'all match' });
+
+      result = await fetch('/api/graphql?foo=xyz&bar=456&var=1000');
+      assert.deepEqual(await result.json(), { hint: 'pattern match' });
+
+      result = await fetch('/api/graphql?bar=hello&var=999');
+      assert.deepEqual(await result.json(), { hint: 'fallback' });
+
+      await assert.rejects(
+        fetch('/api/graphql?foo=123&bar=456&var=999'),
+        /Pretender intercepted GET \/api\/graphql\?foo=123&bar=456&var=999 \nbut found no handler for it/,
+        'throws this error when query values do not match'
+      );
+    });
+  });
+
+  module('better error message', function (hooks) {
+    hooks.beforeEach(function () {
+      this.server = new QueryParamAwarePretender({ normalizeURLs: true });
+    });
+
+    hooks.afterEach(function () {
+      this.server.shutdown();
+    });
+
+    test('should error out with values not match', async function (assert) {
+      this.server.get('/api/graphql?foo=123&bar=456&var=1000', () => [
+        200,
+        {},
+        JSON.stringify({ foo: '123', bar: '456', var: '1000' }),
+      ]);
+      this.server.get('/api/graphql?foo=john&bar=world&var=hello', () => [
+        200,
+        {},
+        JSON.stringify({ foo: '123', bar: '456', var: '1000' }),
+      ]);
+
+      await assert.rejects(
+        fetch('/api/graphql?foo=123&bar=456&var=999'),
+        /query parameter values of:\n\t\{\n\t\tbar=456\n\t\tfoo=123\n\t\tvar=999\n\t\}/,
+        'throws this error when query values do not match'
+      );
+    });
+
+    test('should error out with names not match', async function (assert) {
+      this.server.get('/api/graphql?foo=123&bar=456&variable=1000', () => [
+        200,
+        {},
+        JSON.stringify({ foo: '123', bar: '456', variable: '1000' }),
+      ]);
+
+      await assert.rejects(
+        fetch('/api/graphql?foo=123&bar=456&var=999'),
+        /query parameter names of:\n\t\[bar,foo,var\]/,
+        'throws this error when query names do not match'
       );
     });
   });

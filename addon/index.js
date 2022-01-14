@@ -1,5 +1,11 @@
+const UNHANDLED_REQUEST_MSG_DEFAULT =
+  'but no handler was defined for this type of request';
+
 import Pretender from 'pretender';
-import SimplePatternMatchers from './pattern-matchers';
+import SimplePatternMatchers, {
+  MATCH_FOUND,
+  PARAM_NAME_NOT_MATCH,
+} from './pattern-matchers';
 
 function normalizeQueryString(requestUrl) {
   let url = new URL(requestUrl, document.baseURI);
@@ -13,16 +19,17 @@ function normalizeQueryString(requestUrl) {
 }
 
 const QueryParamHandlers = new WeakMap();
+const requestRejectionReasons = new WeakMap();
 
 export function buildQueryParamHandler() {
   let matchers = new SimplePatternMatchers();
 
   function handler(request) {
     let queryString = normalizeQueryString(request.url);
-    let match = matchers.get(queryString);
+    let { handler } = matchers.get(queryString);
 
-    if (match) {
-      return match(...arguments);
+    if (handler) {
+      return handler(...arguments);
     } else {
       // TODO: hook into Pretender's unhandledRequest system when a full Pretender instance is present
       throw new Error(
@@ -108,15 +115,26 @@ export class QueryParamAwarePretender extends Pretender {
     if (handlerFound !== null) {
       let { matchers } = QueryParamHandlers.get(handlerFound.handler);
 
-      let matchFound = matchers.get(search);
+      let { result, message, handler } = matchers.get(search);
 
-      if (!matchFound) {
-        matchFound = matchers.get(''); // fallback
+      if (result !== MATCH_FOUND) {
+        requestRejectionReasons.set(request, message);
+        // no fallback if param values don't match
+        if (result && result === PARAM_NAME_NOT_MATCH) {
+          handler = matchers.get('').handler; // fallback
+        }
       }
 
-      return matchFound ? { handler: matchFound } : null;
+      return handler ? { handler: handler } : null;
     }
 
     return null;
+  }
+
+  // Overrides default method to provide a more meaningful error message
+  unhandledRequest(verb, path, _request) {
+    const msg =
+      requestRejectionReasons.get(_request) || UNHANDLED_REQUEST_MSG_DEFAULT;
+    throw new Error(`Pretender intercepted ${verb} ${path} ${msg}`);
   }
 }

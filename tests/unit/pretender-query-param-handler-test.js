@@ -146,33 +146,6 @@ module('pretender-query-params-handler', function () {
       );
     });
 
-    test('can match a request with query params in any order', async function (assert) {
-      this.server = new QueryParamAwarePretender({
-        normalizeURLs: true,
-      });
-      this.server.get('/api/graphql?foo=bar&bar=baz', () => [
-        200,
-        {},
-        JSON.stringify({ query: { foo: 'bar', bar: 'baz' } }),
-      ]);
-
-      let result = await fetch('/api/graphql?bar=baz&foo=bar');
-      assert.deepEqual(await result.json(), {
-        query: { foo: 'bar', bar: 'baz' },
-      });
-
-      result = await fetch('/api/graphql?foo=bar&bar=baz');
-      assert.deepEqual(await result.json(), {
-        query: { foo: 'bar', bar: 'baz' },
-      });
-
-      await assert.rejects(
-        fetch('/api/graphql?foo=derp'),
-        /Pretender intercepted GET \/api\/graphql\?foo=derp \nbut found no handler for it/,
-        'throws when missing a match'
-      );
-    });
-
     test('it allows clobbering', async function (assert) {
       this.server.get('/api/graphql?foo=bar', () => [
         200,
@@ -524,6 +497,50 @@ module('pretender-query-params-handler', function () {
         /query parameter names of:\n\t\[bar,foo,var\]/,
         'throws this error when query names do not match'
       );
+    });
+  });
+
+  module('paththrough', function (hooks) {
+    hooks.beforeEach(function () {
+      this.server = new QueryParamAwarePretender({ normalizeURLs: true });
+    });
+
+    hooks.afterEach(function () {
+      this.server.shutdown();
+    });
+
+    test('basic case without query parameters', async function (assert) {
+      this.server.get(
+        'http://worldtimeapi.org/api/timezone/Etc/UTC',
+        this.server.passthrough
+      );
+
+      let now = new Date();
+      let result = await fetch('http://worldtimeapi.org/api/timezone/Etc/UTC');
+
+      assert.equal((await result.json()).day_of_week, now.getUTCDay());
+    });
+
+    test('should work if query params match', async function (assert) {
+      this.server.get(
+        'http://worldtimeapi.org/api/timezone/Etc/UTC?__nonpassthrough__=nonpassthrough',
+        () => [200, {}, JSON.stringify({ day_of_week: 100 })]
+      );
+      this.server.get(
+        'http://worldtimeapi.org/api/timezone/Etc/UTC?__passthrough___=passthrough',
+        this.server.passthrough
+      );
+
+      let result = await fetch(
+        'http://worldtimeapi.org/api/timezone/Etc/UTC?__nonpassthrough__=nonpassthrough'
+      );
+      assert.equal((await result.json()).day_of_week, 100);
+
+      let now = new Date();
+      result = await fetch(
+        'http://worldtimeapi.org/api/timezone/Etc/UTC?__passthrough___=passthrough'
+      );
+      assert.equal((await result.json()).day_of_week, now.getUTCDay());
     });
   });
 });

@@ -1,3 +1,16 @@
+
+## v1.3.0 (2022-01-21)
+
+#### :rocket: Enhancement
+* [#10](https://github.com/rwjblue/pretender-query-param-handler/pull/10) Provide better error messages when query parameter names or values don't match ([@larry-x-yu](https://github.com/larry-x-yu))
+* [#9](https://github.com/rwjblue/pretender-query-param-handler/pull/9) Matching by pattern with fallback ([@larry-x-yu](https://github.com/larry-x-yu))
+
+#### :bug: Bug Fix
+* [#11](https://github.com/rwjblue/pretender-query-param-handler/pull/11) Reinstated passthrough support ([@larry-x-yu](https://github.com/larry-x-yu))
+
+#### Committers: 1
+- [@larry-x-yu](https://github.com/larry-x-yu)
+
 ## v1.2.1 (2021-07-01)
 
 #### :bug: Bug Fix

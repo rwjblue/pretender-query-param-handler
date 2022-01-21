@@ -45,8 +45,8 @@
     "pretender": "^3.4.3",
     "prettier": "^2.1.1",
     "qunit": "^2.11.2",
-    "release-it": "^14.0.2",
-    "release-it-lerna-changelog": "^2.4.0"
+    "release-it": "^14.12.3",
+    "release-it-lerna-changelog": "^4.0.1"
   },
   "peerDependencies": {
     "pretender": "^3.4.3"

@@ -131,10 +131,33 @@ export class QueryParamAwarePretender extends Pretender {
     return null;
   }
 
-  // Overrides default method to provide a more meaningful error message
+  // Overrides parent method to provide a more meaningful error message
   unhandledRequest(verb, path, _request) {
     const msg =
       requestRejectionReasons.get(_request) || UNHANDLED_REQUEST_MSG_DEFAULT;
     throw new Error(`Pretender intercepted ${verb} ${path} ${msg}`);
+  }
+
+  // Overrides parent method to reinstate passthrough support
+  checkPassthrough(request) {
+    let isPassthrough = false;
+
+    const verb = request.method.toUpperCase();
+    const url = request.url;
+    let { pathname, search } = new URL(url, document.baseURI);
+    search = this.normalizeURLs ? normalizeQueryString(url) : search;
+
+    let handlerFound = super._handlerFor(verb, pathname, request);
+    if (handlerFound !== null) {
+      let { matchers } = QueryParamHandlers.get(handlerFound.handler);
+      let { result, handler } = matchers.get(search);
+      isPassthrough = result === MATCH_FOUND && handler === this.passthrough;
+    }
+
+    if (isPassthrough) {
+      this.passthroughRequests.push(request);
+      this.passthroughRequest(verb, pathname, request);
+    }
+    return isPassthrough;
   }
 }

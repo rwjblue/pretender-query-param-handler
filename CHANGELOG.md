@@ -1,4 +1,13 @@
 
+
+## v1.3.1 (2022-05-03)
+
+#### :bug: Bug Fix
+* [#12](https://github.com/rwjblue/pretender-query-param-handler/pull/12) Fix call for parent constructor to receive arguments ([@Shivam91](https://github.com/Shivam91))
+
+#### Committers: 1
+- Shivam Tanna ([@Shivam91](https://github.com/Shivam91))
+
 ## v1.3.0 (2022-01-21)
 
 #### :rocket: Enhancement

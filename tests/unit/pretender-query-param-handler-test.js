@@ -543,4 +543,23 @@ module('pretender-query-params-handler', function () {
       assert.equal((await result.json()).day_of_week, now.getUTCDay());
     });
   });
+
+  module('pretender arguments', function (hooks) {
+    hooks.beforeEach(function () {
+      this.server = new QueryParamAwarePretender(() => {}, {
+        forcePassthrough: true,
+      });
+    });
+
+    hooks.afterEach(function () {
+      this.server.shutdown();
+    });
+
+    test('passing in arguments to pretender-query-param-handler works', async function (assert) {
+      assert.ok(
+        this.server.forcePassthrough,
+        'arguments are passed along as expected'
+      );
+    });
+  });
 });

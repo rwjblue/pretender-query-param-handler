@@ -72,7 +72,7 @@ export class QueryParamAwarePretender extends Pretender {
   normalizeURLs = false;
 
   constructor(options) {
-    super(arguments);
+    super(...arguments);
 
     if (
       typeof options === 'object' &&

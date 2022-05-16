@@ -581,16 +581,12 @@ module('pretender-query-params-handler', function () {
         assert.deepEqual(
           request.queryParams,
           {
-            foo : 'bar'
+            foo: 'bar',
           },
-          'query params do exist on the request',
+          'query params do exist on the request'
         );
 
-        return [
-          200,
-          {},
-          JSON.stringify({ query: 'bar' }),
-        ]
+        return [200, {}, JSON.stringify({ query: 'bar' })]
       });
 
       await fetch('/api/graphql?foo=bar');

@@ -586,7 +586,7 @@ module('pretender-query-params-handler', function () {
           'query params do exist on the request'
         );
 
-        return [200, {}, JSON.stringify({ query: 'bar' })]
+        return [200, {}, JSON.stringify({ query: 'bar' })];
       });
 
       await fetch('/api/graphql?foo=bar');

@@ -588,7 +588,7 @@ module('pretender-query-params-handler', function () {
       }
     );
 
-    let result = await fetch('/api/graphql?foo=bar');
+    await fetch('/api/graphql?foo=bar');
     });
   });
 });

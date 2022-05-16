@@ -575,10 +575,16 @@ module('pretender-query-params-handler', function () {
     });
 
     test('query params are used to find the handler', async function (assert) {
-      assert.expect(1)
+      assert.expect(1);
 
       this.server.get('/api/graphql?foo=bar', (request) => {
-        assert.deepEqual(request.queryParams, { foo : 'bar' }, 'query params do exist on the request');
+        assert.deepEqual(
+          request.queryParams,
+          {
+            foo : 'bar'
+          },
+          'query params do exist on the request',
+        );
 
         return [
           200,

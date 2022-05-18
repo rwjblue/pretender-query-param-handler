@@ -574,7 +574,7 @@ module('pretender-query-params-handler', function () {
       this.server.shutdown();
     });
 
-    test('query params are used to find the handler', async function (assert) {
+    test('query params are passed to the handler', async function (assert) {
       assert.expect(1);
 
       this.server.get('/api/graphql?foo=bar', (request) => {

@@ -562,4 +562,34 @@ module('pretender-query-params-handler', function () {
       );
     });
   });
+
+  module('query params for handlerFound', function (hooks) {
+    hooks.beforeEach(function () {
+      this.server = new QueryParamAwarePretender(() => {}, {
+        forcePassthrough: true,
+      });
+    });
+
+    hooks.afterEach(function () {
+      this.server.shutdown();
+    });
+
+    test('query params are passed to the handler', async function (assert) {
+      assert.expect(1);
+
+      this.server.get('/api/graphql?foo=bar', (request) => {
+        assert.deepEqual(
+          request.queryParams,
+          {
+            foo: 'bar',
+          },
+          'query params do exist on the request'
+        );
+
+        return [200, {}, JSON.stringify({ query: 'bar' })];
+      });
+
+      await fetch('/api/graphql?foo=bar');
+    });
+  });
 });

@@ -106,11 +106,20 @@ export class QueryParamAwarePretender extends Pretender {
 
   // instrumented to provide a nicer error message when a handler for a given queryString is not found
   _handlerFor(verb, url, request) {
-    let { pathname, search } = new URL(url, document.baseURI);
+    let { pathname, search: originalSearchStr } = new URL(
+      url,
+      document.baseURI
+    );
 
-    search = this.normalizeURLs ? normalizeQueryString(url) : search;
+    let search = this.normalizeURLs
+      ? normalizeQueryString(url)
+      : originalSearchStr;
 
-    let handlerFound = super._handlerFor(verb, pathname, request);
+    let handlerFound = super._handlerFor(
+      verb,
+      `${pathname}${originalSearchStr}`,
+      request
+    );
 
     if (handlerFound !== null) {
       let { matchers } = QueryParamHandlers.get(handlerFound.handler);

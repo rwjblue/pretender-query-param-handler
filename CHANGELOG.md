@@ -1,5 +1,15 @@
 
 
+
+## v1.3.2 (2022-05-23)
+
+#### :bug: Bug Fix
+* [#13](https://github.com/rwjblue/pretender-query-param-handler/pull/13) Pass query parameters to handlers ([@Shivam91](https://github.com/Shivam91))
+
+#### Committers: 1
+- Shivam Tanna ([@Shivam91](https://github.com/Shivam91))
+
+
 ## v1.3.1 (2022-05-03)
 
 #### :bug: Bug Fix

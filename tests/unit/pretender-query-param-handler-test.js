@@ -498,6 +498,57 @@ module('pretender-query-params-handler', function () {
         'throws this error when query names do not match'
       );
     });
+
+    test('error object should include the query param maps', async function (assert) {
+      assert.expect(3);
+
+      const mapToObject = (map) => {
+        const result = {};
+        for (const [key, value] of map.entries()) {
+          result[key] = value;
+        }
+        return result;
+      };
+      const parentUnhandledRequest = this.server.unhandledRequest;
+      this.server.unhandledRequest = function () {
+        try {
+          parentUnhandledRequest.apply(this, arguments);
+        } catch (error) {
+          assert.deepEqual(
+            mapToObject(error.requestedQueryParams),
+            { foo: '123', bar: '456', var: '999' },
+            'requestedQueryParams is correct'
+          );
+          assert.deepEqual(
+            error.existingQueryParams.map(mapToObject),
+            [
+              { foo: '123', bar: '456', var: '1000' },
+              { foo: 'john', bar: 'world', var: 'hello' },
+            ],
+            'existingQueryParams is correct'
+          );
+
+          throw error;
+        }
+      };
+
+      this.server.get('/api/graphql?foo=123&bar=456&var=1000', () => [
+        200,
+        {},
+        JSON.stringify({ foo: '123', bar: '456', var: '1000' }),
+      ]);
+      this.server.get('/api/graphql?foo=john&bar=world&var=hello', () => [
+        200,
+        {},
+        JSON.stringify({ foo: 'john', bar: 'world', var: 'hello' }),
+      ]);
+
+      await assert.rejects(
+        fetch('/api/graphql?foo=123&bar=456&var=999'),
+        /query parameter values of:\n\t\{\n\t\tbar=456\n\t\tfoo=123\n\t\tvar=999\n\t\}/,
+        'throws this error when query values do not match'
+      );
+    });
   });
 
   module('paththrough', function (hooks) {

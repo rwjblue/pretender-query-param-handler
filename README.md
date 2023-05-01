@@ -125,7 +125,27 @@ result = await fetch('/api/graphql?bar=baz&foo=bar');
 console.log(await result.json());
 //=> { query: { foo: 'bar', bar: 'baz' } }
 
+
 ```
+Unhandled Requests
+------------------------------------------------------------------------------
+
+```javascript
+
+const parentUnhandledRequest = this.server.unhandledRequest;
+server.unhandledRequest = function () {
+  try {
+    parentUnhandledRequest.apply(this, arguments);
+  } catch (error) {
+    error.requestedQueryParams  // Map<ParamName,ParamValue> unhandled request
+    error.existingQueryParams   // Map<ParamName,ParamValue> registered handlers
+
+    // You can customize error messages here
+    throw error;
+  }
+};
+```
+
 
 Limitations
 ------------------------------------------------------------------------------

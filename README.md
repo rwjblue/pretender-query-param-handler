@@ -1,12 +1,10 @@
-pretender-query-param-handler
-==============================================================================
+# pretender-query-param-handler
 
 This package provides a helper function and wrapped `Pretender` class with support
 for matching query params as part of a registered handler.
 
 
-Installation
-------------------------------------------------------------------------------
+## Installation
 
 ```
 # npm
@@ -17,8 +15,7 @@ yarn add pretender-query-param-handler
 ```
 
 
-Usage
-------------------------------------------------------------------------------
+## Usage
 
 Nothing beats a quick demo:
 
@@ -151,13 +148,11 @@ Limitations
 ------------------------------------------------------------------------------
 Internet Explorer/IE is not supported due to the lack of proper Api support.
 
-Contributing
-------------------------------------------------------------------------------
+## Contributing
 
 See the [Contributing](CONTRIBUTING.md) guide for details.
 
 
-License
-------------------------------------------------------------------------------
+## License
 
 This project is licensed under the [MIT License](LICENSE.md).

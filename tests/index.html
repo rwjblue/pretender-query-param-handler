@@ -1,35 +1,34 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Dummy Tests</title>
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+  <meta charset="utf-8">
+  <title>Dummy Tests</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="{{rootURL}}assets/vendor.css">
-    <link rel="stylesheet" href="{{rootURL}}assets/test-support.css">
-  </head>
-  <body>
-    <div id="qunit"></div>
-    <div id="qunit-fixture">
-      <div id="ember-testing-container">
-        <div id="ember-testing"></div>
-      </div>
-    </div>
+  <link rel="stylesheet" href="{{rootURL}}assets/vendor.css">
+  <link rel="stylesheet" href="{{rootURL}}assets/test-support.css">
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture">
+  <div id="ember-testing-container">
+    <div id="ember-testing"></div>
+  </div>
+</div>
 
-    <script src="{{rootURL}}assets/vendor.js"></script>
-    <script src="{{rootURL}}assets/test-support.js"></script>
+<script src="{{rootURL}}assets/vendor.js"></script>
+<script src="{{rootURL}}assets/test-support.js"></script>
 
-    <!--
-      loading /testem after test-support.js to avoid having ember-cli itself call
-      Testem.hookIntoTestFramework() before QUnit is loaded; this is a bit bad
-      because any errors that happen in vendor.js and test-support.js will not be
-      seen by testem...
-    -->
-    <script src="/testem.js" integrity=""></script>
+<!--
+  loading /testem after test-support.js to avoid having ember-cli itself call
+  Testem.hookIntoTestFramework() before QUnit is loaded; this is a bit bad
+  because any errors that happen in vendor.js and test-support.js will not be
+  seen by testem...
+-->
+<script src="/testem.js" integrity="" data-embroider-ignore></script>
 
-    <script src="{{rootURL}}assets/dummy.js"></script>
-    <script src="{{rootURL}}assets/tests.js"></script>
-  </body>
+<script src="{{rootURL}}assets/dummy.js"></script>
+<script src="{{rootURL}}assets/tests.js"></script>
+</body>
 </html>

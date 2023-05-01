@@ -124,10 +124,21 @@ export class QueryParamAwarePretender extends Pretender {
     if (handlerFound !== null) {
       let { matchers } = QueryParamHandlers.get(handlerFound.handler);
 
-      let { result, message, handler } = matchers.get(search);
+      let {
+        result,
+        message,
+        handler,
+        requestedQueryParams,
+        existingQueryParams,
+      } = matchers.get(search);
 
       if (result !== MATCH_FOUND) {
-        requestRejectionReasons.set(request, message);
+        const error = new Error(
+          `Pretender intercepted ${verb} ${url} ${message}`
+        );
+        error.requestedQueryParams = requestedQueryParams;
+        error.existingQueryParams = existingQueryParams;
+        requestRejectionReasons.set(request, error);
         // no fallback if param values don't match
         if (result && result === PARAM_NAME_NOT_MATCH) {
           handler = matchers.get('').handler; // fallback
@@ -141,10 +152,13 @@ export class QueryParamAwarePretender extends Pretender {
   }
 
   // Overrides parent method to provide a more meaningful error message
-  unhandledRequest(verb, path, _request) {
-    const msg =
-      requestRejectionReasons.get(_request) || UNHANDLED_REQUEST_MSG_DEFAULT;
-    throw new Error(`Pretender intercepted ${verb} ${path} ${msg}`);
+  unhandledRequest(verb, path, request) {
+    const error =
+      requestRejectionReasons.get(request) ||
+      new Error(
+        `Pretender intercepted ${verb} ${path} ${UNHANDLED_REQUEST_MSG_DEFAULT}`
+      );
+    throw error;
   }
 
   // Overrides parent method to reinstate passthrough support

@@ -115,6 +115,7 @@ class SimplePatternMatchers {
 
     let requested = null;
     let existing = null;
+    let existingQueryParams = paramNameMatches;
 
     if (paramNameMatches.length > 0) {
       requested = this.mapToText(testMap);
@@ -128,9 +129,13 @@ class SimplePatternMatchers {
     } else {
       requested = this.arryToText([...testMap.keys()]);
       existing = [];
+      existingQueryParams = [];
       for (let paramMap of this.patternMapByQueryString.values()) {
         existing.push(this.arryToText([...paramMap.keys()]));
+        existingQueryParams.push(paramMap);
       }
+
+      existingQueryParams = paramNameMatches;
 
       result = PARAM_NAME_NOT_MATCH;
       message = `${message}query parameter names of:\n`;
@@ -140,7 +145,12 @@ class SimplePatternMatchers {
       `${message}\t${requested}\n` +
       `don't match any of:\n[\n\t${existing.join(',\n\t')}\n]`;
 
-    return { result, message };
+    return {
+      result,
+      message,
+      existingQueryParams,
+      requestedQueryParams: testMap,
+    };
   }
 
   /**

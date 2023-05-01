@@ -1,6 +1,6 @@
 {
   "name": "pretender-query-param-handler",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "description": "Library to help with working with Pretender and Query Param heavy APIs",
   "keywords": [
     "ember-addon"

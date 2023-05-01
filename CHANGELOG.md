@@ -1,6 +1,16 @@
 
 
 
+
+## v1.4.0 (2023-05-01)
+
+#### :rocket: Enhancement
+* [#15](https://github.com/rwjblue/pretender-query-param-handler/pull/15)  feat: unhandledRequest throws a custom error with query param maps ([@yangpiao](https://github.com/yangpiao))
+
+#### Committers: 2
+- David J. Hamilton ([@hjdivad](https://github.com/hjdivad))
+- Yang Piao ([@yangpiao](https://github.com/yangpiao))
+
 ## v1.3.2 (2022-05-23)
 
 #### :bug: Bug Fix
